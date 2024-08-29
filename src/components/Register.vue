@@ -1,45 +1,85 @@
 <template>
   <div class="register-container">
     <h1>Application Register</h1>
-    <form @submit.prevent="onSubmit">
+    <form @submit.prevent="register">
       <div class="input-field">
         <label for="username">Username</label>
-        <input type="text" id="username" v-model="username" required />
+        <input type="text" id="username" v-model="username" />
       </div>
       <div class="input-field">
         <label for="password">Password</label>
-        <input type="password" id="password" v-model="password" required />
+        <input type="password" id="password" v-model="password" />
       </div>
       <div class="input-field">
-        <label for="email">Email Address</label>
-        <input type="email" id="email" v-model="email" required />
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" v-model="firstName" />
       </div>
-      <button @click="register">Register</button>
-      <button @click="backToLogin">Back</button>
+      <div class="input-field">
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" v-model="lastName" />
+      </div>
+      <button type="submit">Register</button>
+      <button type="button" @click="backToLogin">Back</button>
     </form>
   </div>
 </template>
 
 <script>
 import router from "@/Router/index.js";
+import apiService from "@/service/apiService"; // Import the apiService
 
 export default {
   data() {
     return {
       username: "",
       password: "",
-      email: "",
+      firstName: "",
+      lastName: "",
     };
   },
   methods: {
-    register() {
-      // TODO: Implement registration logic here
-      console.log("Submitting registration form...");
+    async register() {
+      try {
+        console.log("Submitting registration form...");
+
+        // Prepare the request payload
+        const requestData = {
+          userName: this.username,
+          password: this.password,
+          firstName: this.firstName,
+          lastName: this.lastName,
+        };
+
+        // Call the backend API to register the user
+        const response = await apiService.post("/user/register", requestData);
+
+        if (response.status === 200) {
+          console.log("Registration successful", response.data);
+
+          // Navigate to the OTP confirmation page with the user data
+          router.push({
+            path: "/register-confirm",
+            query: {
+              userName: this.username,
+              password: this.password,
+              firstName: this.firstName,
+              lastName: this.lastName,
+              base32SecretKey: response.data, // Assuming response.data is the base32SecretKey
+            },
+          });
+        } else {
+          console.error("Registration failed", response.data);
+          // Handle error (e.g., display error message to the user)
+        }
+      } catch (error) {
+        console.error("An error occurred during registration:", error);
+        // Handle error (e.g., display error message to the user)
+      }
     },
-    backToLogin(){
-      console.log("back to login");
-      router.push('/login')
-    }
+    backToLogin() {
+      console.log("Back to login");
+      router.push("/login");
+    },
   },
 };
 </script>

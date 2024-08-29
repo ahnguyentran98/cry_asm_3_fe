@@ -1,41 +1,71 @@
 <template>
   <div class="login-container">
     <h1>Login</h1>
-    <form>
+    <form @submit.prevent="login">
       <div class="input-field">
         <label for="username">Username</label>
-        <input type="text" id="username" v-model="username" required />
+        <input type="text" id="username" v-model="userName" />
       </div>
       <div class="input-field">
         <label for="password">Password</label>
-        <input type="password" id="password" v-model="password" required />
+        <input type="password" id="password" v-model="password" />
       </div>
       <div>
-        <button @click="submit" class="login-button">Login</button>
-        <button @click="goToRegister" class="register-button">Register</button>
+        <button type="submit" class="login-button">Login</button>
+        <button type="button" @click="goToRegister" class="register-button">Register</button>
       </div>
     </form>
+    <h2 v-if="loginErr">Wrong username or password</h2>
   </div>
 </template>
 
 <script>
 import router from "@/Router/index.js";
+import apiService from "@/service/apiService"; // Correct import path
 
 export default {
   data() {
     return {
-      username: "",
+      userName: "",
       password: "",
+      loginErr: false,
     };
   },
   methods: {
-    submit() {
-      // TODO: Implement login logic here
+    async login() {
       console.log("Submitting login form...");
+
+      try {
+        // Prepare the request payload
+        const requestData = {
+          userName: this.userName,
+          password: this.password,
+        };
+
+        // Call the backend API to validate the user credentials
+        const response = await apiService.post("/user/login", requestData);
+
+        if (response.status === 200 && response.data) {
+          // Redirect to the OTP submission page with user info as query parameters
+          router.push({
+            path: "/submit-otp",
+            query: {
+              userName: this.userName,
+              password: this.password
+            },
+          });
+        } else {
+          console.error("Login failed", response.data);
+          this.loginErr = true; // Show error message
+        }
+      } catch (error) {
+        console.error("An error occurred during login:", error);
+        this.loginErr = true; // Show error message
+      }
     },
     goToRegister() {
-      router.push('/register')
       console.log("Go to register...");
+      router.push("/register");
     },
   },
 };
