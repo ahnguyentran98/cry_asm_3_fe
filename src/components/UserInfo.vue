@@ -3,8 +3,9 @@
     <div class="card">
       <p class="welcome-text">Welcome {{ user.firstName }} {{ user.lastName }}</p>
       <ul>
-        <li><router-link to="/post-message">View news</router-link></li>
-        <li><router-link to="/view-message">Write news</router-link></li>
+        <li><router-link to="/view-message">View news</router-link></li>
+        <li><router-link to="/post-message">Write news</router-link></li>
+        <li v-if="user.role === 'ADMIN'"><router-link to="/update-user-level">User level setting</router-link></li>
         <li><router-link to="/login" @click="logout">Logout</router-link></li>
       </ul>
     </div>
@@ -20,6 +21,7 @@ export default {
         firstName: "",
         lastName: "",
         label: "",
+        role:"",
         date: new Date().toLocaleDateString(),
       },
     };

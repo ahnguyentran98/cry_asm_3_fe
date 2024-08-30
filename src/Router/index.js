@@ -7,6 +7,7 @@ import SubmitOTP from '@/components/SubmitOTP.vue';
 import UserInfo from '@/components/UserInfo.vue';
 import PostMessage from '@/components/PostMessage.vue';
 import ViewMessage from '@/components/ViewMessage.vue';
+import UpdateUserLevel from '@/components/UpdateUserLevel.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -45,6 +46,11 @@ const router = createRouter({
             path: '/view-message',
             name: 'ViewMessagePage',
             component: ViewMessage
+        },
+        {
+            path: '/update-user-level',
+            name: 'UpdateUserLevel',
+            component: UpdateUserLevel
         },
         {
             path: '/',

@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <h3 class="title">Notices</h3>
-    <table class="notices-table">
+    <table class="notices-table" v-if="notices.length != 0">
       <thead>
         <tr>
           <th>ID#</th>
@@ -21,31 +21,65 @@
         </tr>
       </tbody>
     </table>
+    <div class="title" v-if="notices.length === 0">No news existed</div>
+    <button type="button" @click="backToUserInfo" class="register-button">Back</button>
   </div>
 </template>
 
 <script>
+import apiService from "@/service/apiService"; // Correct import path
+import router from "@/Router/index.js";
+
 export default {
   name: 'ViewMessage',
   data() {
     return {
-      notices: [
-        {
-          id: 10,
-          content: "Hi all,\nWe will meet 9pm tonight.",
-          author: "tungtot",
-          date: "10-Sep-20",
-          label: "Top Secret",
-        },
-        {
-          id: 17,
-          content: "Dear all, This world is wonderful!",
-          author: "alice",
-          date: "10-Sep-20",
-          label: "Confidentiality",
-        },
-      ],
+      notices: [], // Initialize as an empty array
     };
+  },
+  created() {
+    this.fetchNews();
+  },
+  methods: {
+    async fetchNews() {
+      try {
+        // Get user info from local storage
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+        if (!userInfo || !userInfo.id) {
+          console.warn("User info not found in local storage. Redirecting to login.");
+          this.$router.push("/login");
+          return;
+        }
+        
+        const userId = userInfo.id;
+
+        // Call the backend API to fetch the news for the user
+        const response = await apiService.get(`/news/${userId}`);
+
+        if (response.status === 200) {
+          console.log("News fetched successfully", response.data);
+
+          // Map the response data to the notices array
+          this.notices = response.data.map(news => ({
+            id: news.id,
+            content: news.content,
+            author: news.user.userName, // Assuming user object contains userName
+            date: new Date(news.date).toLocaleDateString(), // Format the date
+            label: news.label,
+          }));
+        } else {
+          console.error("Failed to fetch news", response.data);
+          // Handle the error case
+        }
+      } catch (error) {
+        console.error("An error occurred while fetching news:", error);
+        // Handle the error case
+      }
+    },
+    backToUserInfo(){
+      router.push("/user-info");
+    }
   },
 };
 </script>
@@ -62,7 +96,7 @@ export default {
 }
 
 .title {
-  color: #000; /* Ensure the title is black */
+  color: #000;
   font-weight: bold;
   margin-top: 0;
 }
@@ -78,7 +112,7 @@ export default {
   border: 1px solid #1c4e8a;
   padding: 8px;
   text-align: left;
-  color: #000; /* Ensure text is black */
+  color: #000;
 }
 
 .notices-table th {
@@ -91,6 +125,6 @@ export default {
 }
 
 h3 {
-  color: #000; /* Ensure the heading is black */
+  color: #000;
 }
 </style>
