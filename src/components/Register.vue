@@ -19,6 +19,7 @@
         <label for="lastName">Last Name</label>
         <input type="text" id="lastName" v-model="lastName" />
       </div>
+      <h2 v-if="registerErr">{{errorMessage}}</h2>
       <button type="submit">Register</button>
       <button type="button" @click="backToLogin">Back</button>
     </form>
@@ -36,7 +37,9 @@ export default {
       password: "",
       firstName: "",
       lastName: "",
-      passwordError: "", // Track password validation errors
+      passwordError: "",
+      registerErr: false,
+      errorMessage: ""
     };
   },
   methods: {
@@ -99,9 +102,13 @@ export default {
           // Navigate to the OTP confirmation page
           router.push("/register-confirm");
         } else {
+          this.registerErr = true
+          this.errorMessage = response.data.message
           console.error("Registration failed", response.data);
         }
       } catch (error) {
+        this.registerErr = true
+        this.errorMessage = error.response.data.message
         console.error("An error occurred during registration:", error);
       }
     },
