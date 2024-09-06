@@ -15,7 +15,7 @@
         <button type="button" @click="goToRegister" class="register-button">Register</button>
       </div>
     </form>
-    <h2 v-if="loginErr">Wrong username or password</h2>
+    <h2 v-if="loginErr">{{errorMessage}}</h2>
   </div>
 </template>
 
@@ -29,6 +29,7 @@ export default {
       userName: "",
       password: "",
       loginErr: false,
+      errorMessage: ""
     };
   },
   methods: {
@@ -50,17 +51,18 @@ export default {
           router.push({
             path: "/submit-otp",
             query: {
-              userName: this.userName,
-              password: this.password
+              userName: this.userName
             },
           });
         } else {
           console.error("Login failed", response.data);
           this.loginErr = true; // Show error message
+          this.errorMessage = response.data.message
         }
       } catch (error) {
+        this.loginErr = true;
         console.error("An error occurred during login:", error);
-        this.loginErr = true; // Show error message
+        this.errorMessage = error.response.data.message
       }
     },
     goToRegister() {

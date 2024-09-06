@@ -2,6 +2,7 @@
   <div class="container">
     <div class="card">
       <p class="welcome-text">Welcome {{ user.firstName }} {{ user.lastName }}</p>
+      <p class="welcome-text">Your level: {{user.label}}</p>
       <ul>
         <li><router-link to="/view-message">View news</router-link></li>
         <li><router-link to="/post-message">Write news</router-link></li>

@@ -9,6 +9,7 @@
       <div class="input-field">
         <label for="password">Password</label>
         <input type="password" id="password" v-model="password" />
+        <p v-if="passwordError" class="error-message">{{ passwordError }}</p>
       </div>
       <div class="input-field">
         <label for="firstName">First Name</label>
@@ -26,7 +27,7 @@
 
 <script>
 import router from "@/Router/index.js";
-import apiService from "@/service/apiService"; // Import the apiService
+import apiService from "@/service/apiService";
 
 export default {
   data() {
@@ -35,10 +36,40 @@ export default {
       password: "",
       firstName: "",
       lastName: "",
+      passwordError: "", // Track password validation errors
     };
   },
   methods: {
+    validatePassword() {
+      const password = this.password;
+      const hasUppercase = /[A-Z]/.test(password);
+      const hasLowercase = /[a-z]/.test(password);
+      const isLongEnough = password.length >= 6;
+
+      if (!isLongEnough) {
+        this.passwordError = "Password must be at least 6 characters long.";
+        return false;
+      }
+
+      if (!hasUppercase) {
+        this.passwordError = "Password must contain at least one uppercase letter.";
+        return false;
+      }
+
+      if (!hasLowercase) {
+        this.passwordError = "Password must contain at least one lowercase letter.";
+        return false;
+      }
+
+      this.passwordError = ""; // Clear any error if all checks pass
+      return true;
+    },
+
     async register() {
+      if (!this.validatePassword()) {
+        return; // Stop registration if the password is invalid
+      }
+
       try {
         console.log("Submitting registration form...");
 
@@ -56,26 +87,25 @@ export default {
         if (response.status === 200) {
           console.log("Registration successful", response.data);
 
-          // Navigate to the OTP confirmation page with the user data
-          router.push({
-            path: "/register-confirm",
-            query: {
-              userName: this.username,
-              password: this.password,
-              firstName: this.firstName,
-              lastName: this.lastName,
-              base32SecretKey: response.data, // Assuming response.data is the base32SecretKey
-            },
-          });
+          // Navigate to the OTP confirmation page with the user data using state
+
+          // Store user data in sessionStorage
+          sessionStorage.setItem("userName", this.username);
+          sessionStorage.setItem("password", this.password);
+          sessionStorage.setItem("firstName", this.firstName);
+          sessionStorage.setItem("lastName", this.lastName);
+          sessionStorage.setItem("base32SecretKey", response.data);
+
+          // Navigate to the OTP confirmation page
+          router.push("/register-confirm");
         } else {
           console.error("Registration failed", response.data);
-          // Handle error (e.g., display error message to the user)
         }
       } catch (error) {
         console.error("An error occurred during registration:", error);
-        // Handle error (e.g., display error message to the user)
       }
     },
+
     backToLogin() {
       console.log("Back to login");
       router.push("/login");
@@ -118,5 +148,10 @@ button {
   background-color: #4CAF50;
   color: white;
   cursor: pointer;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
 }
 </style>

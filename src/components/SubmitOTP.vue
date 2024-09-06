@@ -21,13 +21,11 @@ export default {
       otp: "",
       otpErr: false,
       userName: "",
-      password: "",
     };
   },
   created() {
     // Get user data from query params
     this.userName = this.$route.query.userName;
-    this.password = this.$route.query.password;
   },
   methods: {
     async submit() {
@@ -37,7 +35,6 @@ export default {
         // Prepare the request payload
         const requestData = {
           userName: this.userName,
-          password: this.password,
           otp: this.otp,
         };
 

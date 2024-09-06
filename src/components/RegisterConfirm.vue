@@ -18,7 +18,7 @@
 
 <script>
 import router from "@/Router/index.js";
-import apiService from "@/service/apiService"; // Correct import path
+import apiService from "@/service/apiService";
 
 export default {
   data() {
@@ -32,12 +32,18 @@ export default {
     };
   },
   created() {
-    // Get user data from query params
-    this.userName = this.$route.query.userName;
-    this.password = this.$route.query.password;
-    this.firstName = this.$route.query.firstName;
-    this.lastName = this.$route.query.lastName;
-    this.base32SecretKey = this.$route.query.base32SecretKey;
+    // Retrieve user data from sessionStorage
+    this.userName = sessionStorage.getItem("userName");
+    this.password = sessionStorage.getItem("password");
+    this.firstName = sessionStorage.getItem("firstName");
+    this.lastName = sessionStorage.getItem("lastName");
+    this.base32SecretKey = sessionStorage.getItem("base32SecretKey");
+
+    if (!this.userName || !this.base32SecretKey) {
+      console.error("No user information found, redirecting to login.");
+      sessionStorage.clear();
+      router.push("/login");
+    }
   },
   methods: {
     async confirmOtp() {
@@ -60,23 +66,19 @@ export default {
         if (response.status === 200) {
           console.log("OTP confirmation successful", response.data);
 
-          // The response contains the UserRes object. You can access its properties here
-          const userRes = response.data;
-          console.log('User registered:', userRes);
-
-          // Redirect to a success page or perform other success actions
+          // Clear the state and redirect to login
+          sessionStorage.clear();
           router.push("/login");
         } else {
           console.error("OTP confirmation failed", response.data);
-          // Handle error (e.g., display error message to the user)
         }
       } catch (error) {
         console.error("An error occurred during OTP confirmation:", error);
-        // Handle error (e.g., display error message to the user)
       }
     },
     backToLogin() {
       console.log("Back to login");
+      sessionStorage.clear();
       router.push("/login");
     },
   },
