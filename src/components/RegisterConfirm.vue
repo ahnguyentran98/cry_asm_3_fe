@@ -1,3 +1,4 @@
+
 <template>
   <div class="otp-confirm-container">
     <h1>OTP Confirmation</h1>
@@ -8,11 +9,14 @@
     <form @submit.prevent="confirmOtp">
       <div class="input-field">
         <label for="otp">Enter OTP</label>
-        <input type="number" id="otp" v-model="otp" />
+        <input type="number" id="otp" v-model="otp"/>
       </div>
       <button type="submit">Confirm OTP</button>
       <button type="button" @click="backToLogin">Back to Login</button>
     </form>
+
+    <!-- Show error message if there's an error -->
+    <h2 v-if="otpError">{{ errorMessage }}</h2>
   </div>
 </template>
 
@@ -29,6 +33,8 @@ export default {
       lastName: "",
       base32SecretKey: "",
       otp: null,
+      otpError: false,  // Add a flag to track OTP error
+      errorMessage: "", // Add a field to display error message
     };
   },
   created() {
@@ -65,16 +71,24 @@ export default {
 
         if (response.status === 200) {
           console.log("OTP confirmation successful", response.data);
-
-          // Clear the state and redirect to login
-          sessionStorage.clear();
-          router.push("/login");
+          this.backToLogin();
         } else {
           console.error("OTP confirmation failed", response.data);
+          this.handleError(response.data.message + ". Redirecting to login...");
         }
       } catch (error) {
         console.error("An error occurred during OTP confirmation:", error);
+        this.handleError(error.response.data.message + ". Redirecting to login...");
       }
+    },
+    handleError(message) {
+      sessionStorage.clear();
+      this.otpError = true;  // Set the error flag
+      this.errorMessage = message;  // Set the error message
+      // Wait for 2 seconds and then navigate to login
+      setTimeout(() => {
+        this.backToLogin();
+      }, 2000);
     },
     backToLogin() {
       console.log("Back to login");
@@ -119,5 +133,9 @@ button {
   background-color: #4CAF50;
   color: white;
   cursor: pointer;
+}
+
+h2 {
+  color: red;
 }
 </style>
