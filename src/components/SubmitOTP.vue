@@ -5,9 +5,10 @@
       <div class="otp-input">
         <input id="otp" type="text" v-model="otp" />
       </div>
+
       <button type="submit">Submit</button>
     </form>
-    <h2 v-if="otpErr">Wrong OTP, Please check again</h2>
+    <h2 v-if="otpErr">{{ errorMessage }}</h2>
   </div>
 </template>
 
@@ -21,6 +22,7 @@ export default {
       otp: "",
       otpErr: false,
       userName: "",
+      errorMessage: ""
     };
   },
   created() {
@@ -63,12 +65,26 @@ export default {
           router.push("/user-info");
         } else {
           console.error("OTP validation failed", response.data);
-          this.otpErr = true; // Show error message
+          this.handleError(response.data.message + ". Redirecting to login...");
         }
       } catch (error) {
         console.error("An error occurred during OTP submission:", error);
-        this.otpErr = true; // Show error message
+        this.handleError(error.response.data.message + ". Redirecting to login...");
       }
+    },
+    handleError(message) {
+      sessionStorage.clear();
+      this.otpErr = true;  // Set the error flag
+      this.errorMessage = message;  // Set the error message
+      // Wait for 2 seconds and then navigate to login
+      setTimeout(() => {
+        this.backToLogin();
+      }, 2000);
+    },
+    backToLogin() {
+      console.log("Back to login");
+      sessionStorage.clear();
+      router.push("/login");
     },
   },
 };
