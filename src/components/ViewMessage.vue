@@ -64,7 +64,7 @@ export default {
           this.notices = response.data.map(news => ({
             id: news.id,
             content: news.content,
-            author: news.user.userName, // Assuming user object contains userName
+            author: news.userName, // Assuming user object contains userName
             date: new Date(news.date).toLocaleDateString(), // Format the date
             label: news.label,
           }));
